@@ -109,7 +109,7 @@ class PickleTree {
                     //set old parent for cleaning
                     node.old_parent = node.parent;
                     const drop = this.getNode(this.drag_target);
-                    if (this.drag_target === parseInt(e.target.id.split('node_')[1]) || this.drag_target === undefined || drop === undefined || drop.parent.value === node.value) {
+                    if (this.drag_target === parseInt(e.target.id.split('node_')[1]) || this.drag_target === undefined || drop === undefined || drop.parent.value === node.value) {
                         //this means it dragged to outside
                         node.parent = { id: 0 };
                     }else{
