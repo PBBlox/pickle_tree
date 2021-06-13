@@ -210,24 +210,26 @@ class PickleTree {
         this.config = {
             key:new Date().getTime(),
             //logs are open or close
-            logMode: false,
+            logMode      : false,
             //switch mode
-            switchMode: false,
+            switchMode   : false,
             //family mode
             //for child
-            autoChild: true,
+            autoChild    : true,
             //for parent
-            autoParent: true,
+            autoParent   : true,
             //fold icon
-            foldedIcon: 'fa fa-plus',
+            foldedIcon   : 'fa fa-plus',
             //unfold icon
-            unFoldedIcon: 'fa fa-minus',
+            unFoldedIcon : 'fa fa-minus',
             //menu icon
-            menuIcon: ['fa', 'fa-list-ul'],
+            menuIcon     : ['fa', 'fa-list-ul'],
             //start status is collapsed or not
-            foldedStatus: false,
+            foldedStatus : false,
             //drag 
-            drag: false
+            drag         : false,
+            //order
+            order        : false
 
         }
         //check config here!!
@@ -600,11 +602,28 @@ class PickleTree {
         //node group item 
         let div_item = document.createElement("div");
 
+        //make node ordarable
+        if(this.config.order){
+            const o_div = document.createElement('div');
+            //create buttons
+            const up_i = document.createElement('i');
+            const dw_i = document.createElement('i');
+            
+            o_div.classList.add('tree_order_div');
+            up_i.classList.add('fa','fa-arrow-up');
+            dw_i.classList.add('fa','fa-arrow-down');
+
+            o_div.appendChild(up_i);
+            o_div.appendChild(dw_i);
+            div_item.appendChild(o_div);
+        }
+
+
         //make node dragable
         if (this.config.drag) {
             //add drag button to start
-            let a_ditem = document.createElement('a');
-            let i_ditem = document.createElement('i');
+            const a_ditem = document.createElement('a');
+            const i_ditem = document.createElement('i');
             //set icon drag button
             i_ditem.classList.add('fa');
             i_ditem.classList.add('fa-bars');
@@ -757,10 +776,12 @@ class PickleTree {
             let order = (list, p = { n_id: 0, Child: [] }, tree = []) => {
                 let childrens = list.filter(y => y.n_parentid === p.n_id);
                 if (childrens.length > 0) {
+                    // order items by order_num param if exist
+                    childrens.sort((a, b) => parseFloat(a.order_num === undefined ? 0 : a.order_num) - parseFloat(b.order_num === undefined ? 0 : b.order_num));
                     if (p.n_id === 0) {
                         tree = childrens;
                     } else {
-                        p['Child'] = childrens
+                        p.Child = childrens;
                     }
                     for (let i = 0; i < childrens.length; i++) {
                         order(list, childrens[i]);
@@ -773,13 +794,14 @@ class PickleTree {
             let set = (list) => {
                 for (let i = 0; i < list.length; i++) {
                     this.createNode({
-                        n_addional:list[i].n_addional,
-                        n_value: list[i].n_id,
-                        n_title: list[i].n_title,
-                        n_id: list[i].n_id,
-                        n_elements: list[i].n_elements,
-                        n_parent: this.getNode(list[i].n_parentid),
-                        n_checkStatus: typeof list[i].n_checkStatus === 'undefined' ? false : list[i].n_checkStatus
+                        n_data        : list[i],
+                        n_addional    : list[i].n_addional,
+                        n_value       : list[i].n_id,
+                        n_title       : list[i].n_title,
+                        n_id          : list[i].n_id,
+                        n_elements    : list[i].n_elements,
+                        n_parent      : this.getNode(list[i].n_parentid),
+                        n_checkStatus : list[i].n_checkStatus === undefined ? false : list[i].n_checkStatus
                     });
                     if (list[i].Child) {
                         set(list[i].Child);
@@ -803,7 +825,7 @@ class PickleTree {
     getMenu(element, node) {
         //get element location
         let x = element.getBoundingClientRect();
-        let origin = {
+        const origin = {
             node: node,
             left: x.x,
             top: x.y + x.height
@@ -816,7 +838,7 @@ class PickleTree {
         //check if menu already exist
         if (document.getElementById('div_menu_' + obj.node.id) === null) {
             //create menu div
-            let menu_item = document.createElement('div');
+            const menu_item = document.createElement('div');
             //add to body
             document.body.appendChild(menu_item);
             menu_item.id = 'div_menu_' + obj.node.id;
@@ -847,7 +869,14 @@ class PickleTree {
                 menu_item.style.left = obj.left + 'px';
             }
             menu_item.style.top = obj.top + 'px';
+
+            // listen mouse out
+            menu_item.onmouseleave = (e) => {
+                menu_item.remove();
+            };
         }
+
+        
 
     }
 
